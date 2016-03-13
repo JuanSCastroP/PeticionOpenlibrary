@@ -30,8 +30,15 @@ class ViewController: UIViewController {
 
             let texto = NSString(data:datos!, encoding:NSUTF8StringEncoding) //codifica a UTF8
             //print(texto!)
-            var tempTexto = texto as! String // convierte el NSString en string 
-            devuelveLibro.text = tempTexto //evia a uitextview el texto
+            
+            if texto == "{}"{
+                devuelveLibro.text = "ISBN No Encontrado"
+            }else{
+                var tempTexto = texto as! String // convierte el NSString en string
+                devuelveLibro.text = tempTexto //evia a uitextview el texto
+            }
+            
+            
 
         }else{
             devuelveLibro.text = "Verifique su conexion a Internet"
