@@ -13,10 +13,13 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var capturaISBN: UITextField! // texto para cambiar ISBN
     @IBOutlet weak var devuelveLibro: UITextView! // descripcion de libro
+    @IBOutlet weak var devuelveTitulo: UITextView!
+    @IBOutlet weak var devuelveAutor: UITextView!
+    @IBOutlet weak var devuelvePortada: UIImageView!
     
     var ISBN = 0
     
-    func sincrono(){ //  -----> FUNCION SINCRONO <-----
+    func sincrono(){ //  -----> FUNCION SINCRONO <----- otro ISBN 9780071599894
         //let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:978-84-376-0494-7" // direccion del servidor
         
         var urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:"
@@ -32,25 +35,83 @@ class ViewController: UIViewController {
             //print(texto!)
             
             if texto == "{}"{
-                devuelveLibro.text = "ISBN No Encontrado"
+                devuelveTitulo.text = "ISBN No Encontrado"
+                showErrorAlertMessage(devuelveTitulo.text)
+                
             }else{
-                var tempTexto = texto as! String // convierte el NSString en string
-                devuelveLibro.text = tempTexto //evia a uitextview el texto
+                //var tempTexto = texto as! String // convierte el NSString en string
+                //devuelveLibro.text = tempTexto //evia a uitextview el texto
+                do
+                {
+                    let json = try NSJSONSerialization.JSONObjectWithData(datos!, options: NSJSONReadingOptions.MutableLeaves)
+                    let codISBN = "ISBN:" + self.capturaISBN.text!
+                    let dico1 = json as! NSDictionary
+                    let dico2 = dico1[codISBN] as! NSDictionary
+                    let title = dico2["title"] as! NSString as String
+                    
+                    let authors = dico2["authors"] as? [[String: AnyObject]]
+                    
+                    var autores: String = ""
+                    for autor  in authors!
+                    {
+                        if let name = autor["name"] as? String
+                        {
+                            // Do stuff with data
+                            if ( autores != "" )
+                            {
+                                autores = autores + ","
+                            }
+                            autores = autores + (name)
+                        }
+                    }
+                    
+                    if let portada1 = dico2["cover"]
+                    {
+                        let portadas = portada1 as! NSDictionary
+                        let portada = portadas["medium"] as! NSString as String
+                        if let checkedUrl = NSURL(string: portada) {
+                            self.devuelvePortada.contentMode = .ScaleAspectFit
+                            //self.downloadImage(checkedUrl)
+                        }
+                    }
+                    
+                    dispatch_async(dispatch_get_main_queue(), {
+                        // code here
+                        //self.resultsTextView.text = (texto as! String)
+                        self.devuelveTitulo.text = title
+                        self.devuelveAutor.text = autores
+                    })
+                    
+                }//llave do
+                catch _{
+                }
+                
+                
+                
             }
             
             
 
         }else{
-            devuelveLibro.text = "Verifique su conexion a Internet"
-            
+            devuelveTitulo.text = "Verifique su conexion a Internet"
+            showErrorAlertMessage(devuelveTitulo.text)
         }
-        
+    }
+    
+    private func showErrorAlertMessage(mensaje: String) {
+        let alertController = UIAlertController(title: "Error", message: mensaje, preferredStyle: .Alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+        self.presentViewController(alertController, animated: true, completion: nil)
+        //clearFields()
     }
     
     
+    
+    
+
     func asincrono (){ // -----> FUNCION ASINCRONO <-----
       
-        //let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:978-84-376-0494-7" // direccion del servidor
+/*        //let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:978-84-376-0494-7" // direccion del servidor
         var urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:"
         urls += capturaISBN.text!
         let url = NSURL(string: urls)
@@ -61,10 +122,73 @@ class ViewController: UIViewController {
         
         let dt = sesion.dataTaskWithURL(url!, completionHandler: bloque)
         dt.resume()
-        print("antes o despues")
+        print("antes o despues")*/
         
+        func buscarISBN( isbn: NSString){ // funcion para buscar ISBN 9780071599894 y/o 978-84-376-0494-7
+            let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:" + (isbn as String)
+            let url = NSURL(string: urls)
+            let sesion = NSURLSession.sharedSession()
+            let bloque = { (datos: NSData?, resp : NSURLResponse?, error: NSError?) -> Void in
+            
+                if((error) != nil)
+                {
+                    let alertController = UIAlertController(title: "Información del Libro", message:
+                        error?.description, preferredStyle: UIAlertControllerStyle.Alert)
+                    alertController.addAction(UIAlertAction(title: "Cancelar", style: UIAlertActionStyle.Default,handler: nil))
+                
+                    self.presentViewController(alertController, animated: true, completion: nil)
+                }
+                
+                else
+                {
+                do
+                    {
+                        let json = try NSJSONSerialization.JSONObjectWithData(datos!, options: NSJSONReadingOptions.MutableLeaves)
+                        let codISBN = "ISBN:" + self.capturaISBN.text!
+                        let dico1 = json as! NSDictionary
+                        let dico2 = dico1[codISBN] as! NSDictionary
+                        let title = dico2["title"] as! NSString as String
+                        let autor = dico2["Autor"] as? [[String: AnyObject]]
+                    
+                        var autores: String = ""
+                        for autor  in autor!
+                        {
+                            if let name = autor["name"] as? String
+                            {
+                                // Do stuff with data
+                                if ( autores != "" )
+                                {
+                                    autores = autores + ","
+                                }
+                                autores = autores + (name)
+                            }
+                        }
+                    
+                        if let portada1 = dico2["cover"]
+                        {
+                            let portadas = portada1 as! NSDictionary
+                            let portada = portadas["medio"] as! NSString as String
+                            if let checkedUrl = NSURL(string: portada) {
+                                //self.imageView.contentMode = .ScaleAspectFit
+                                // self.downloadImage(checkedUrl)
+                            }
+                        }
+                    
+                        dispatch_async(dispatch_get_main_queue(), {
+                            // code here
+                            //self.resultsTextView.text = (texto as! String)
+                            self.devuelveTitulo.text = title
+                            self.devuelveAutor.text = autores
+                        })
+                    
+                    }//llave do
+                catch _{
+                }
+                } // lave else
+            } //Llave buscar ISBN
+        } // llaves de la funcion asincrona
         
-    }
+    } // llave ViewController
     
  
     
@@ -81,7 +205,8 @@ class ViewController: UIViewController {
     // Boton Limpiar
     @IBAction func LimpiarISBN(sender: AnyObject) {
         capturaISBN.text = ""
-        devuelveLibro.text = ""
+        devuelveTitulo.text = ""
+        devuelveAutor.text = ""
     }
     
     // Boton Buscar
