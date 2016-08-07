@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var devuelveTitulo: UITextView!
     @IBOutlet weak var devuelveAutor: UITextView!
     @IBOutlet weak var devuelvePortada: UIImageView!
+    @IBOutlet weak var labPortada: UILabel!
     
     var ISBN = 0
     
@@ -72,6 +73,7 @@ class ViewController: UIViewController {
                         if let checkedUrl = NSURL(string: portada) {
                             self.devuelvePortada.contentMode = .ScaleAspectFit
                             //self.downloadImage(checkedUrl)
+                            self.labPortada.text = "No hay portada"
                         }
                     }
                     
@@ -80,6 +82,7 @@ class ViewController: UIViewController {
                         //self.resultsTextView.text = (texto as! String)
                         self.devuelveTitulo.text = title
                         self.devuelveAutor.text = autores
+                        self.labPortada.text = "No hay portada"
                     })
                     
                 }//llave do
@@ -109,7 +112,7 @@ class ViewController: UIViewController {
     
     
 
-    func asincrono (){ // -----> FUNCION ASINCRONO <-----
+   func asincrono (){ // -----> FUNCION ASINCRONO <-----
       
 /*        //let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:978-84-376-0494-7" // direccion del servidor
         var urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:"
@@ -170,7 +173,8 @@ class ViewController: UIViewController {
                             let portada = portadas["medio"] as! NSString as String
                             if let checkedUrl = NSURL(string: portada) {
                                 //self.imageView.contentMode = .ScaleAspectFit
-                                // self.downloadImage(checkedUrl)
+                                //self.downloadImage(checkedUrl)
+
                             }
                         }
                     
@@ -179,6 +183,7 @@ class ViewController: UIViewController {
                             //self.resultsTextView.text = (texto as! String)
                             self.devuelveTitulo.text = title
                             self.devuelveAutor.text = autores
+                            self.labPortada.text = "No hay portada"
                         })
                     
                     }//llave do
